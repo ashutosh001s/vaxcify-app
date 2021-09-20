@@ -1,14 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 const SloatItem = (props) => {
   const {
     name,
     address,
-    block_name,
-    pincode,
     fee_type,
-    date,
     available_capacity,
     available_capacity_dose1,
     available_capacity_dose2,
@@ -30,12 +27,16 @@ const SloatItem = (props) => {
           margin: 2,
         }}
       >
-        <Text style={styles.badge}>{`Date : ${date}`}</Text>
-        <Text style={styles.badge}>{`Block : ${block_name}`}</Text>
-        <Text style={styles.badge}>{`Pin : ${pincode}`}</Text>
-        <Text style={styles.badge}>{`Type : ${fee_type}`}</Text>
-        <Text style={styles.badge}>{`Fee : ${fee}`}</Text>
-        <Text style={styles.badge}>{`Capacity : ${available_capacity}`}</Text>
+        <Text
+          style={{
+            ...styles.badge,
+            backgroundColor: `${available_capacity > 0 ? "green" : "red"}`,
+          }}
+        >
+          {available_capacity > 0
+            ? `Capacity : ${available_capacity}`
+            : "Booked"}
+        </Text>
         <Text
           style={styles.badge}
         >{`Dose1 : ${available_capacity_dose2}`}</Text>
@@ -43,7 +44,52 @@ const SloatItem = (props) => {
           style={styles.badge}
         >{`Dose2 : ${available_capacity_dose1}`}</Text>
         <Text style={styles.badge}>{`Min-age : ${min_age_limit}`}</Text>
-        <Text style={styles.badge}>{`Vaccine : ${vaccine}`}</Text>
+
+        {fee > 0 && (
+          <Text
+            style={{
+              ...styles.badge,
+              backgroundColor: "pink",
+            }}
+          >{`Type : ${fee_type}`}</Text>
+        )}
+
+        {fee > 0 ? (
+          <Text
+            style={{
+              ...styles.badge,
+              backgroundColor: "purple",
+            }}
+          >{`Fee : ${fee}`}</Text>
+        ) : (
+          <Text
+            style={{
+              ...styles.badge,
+              backgroundColor: "green",
+            }}
+          >
+            {"Free Vaccination"}
+          </Text>
+        )}
+
+        <Text
+          style={{
+            ...styles.badge,
+            backgroundColor: `${vaccine === "COVISHIELD" ? "white" : "gold"}`,
+            color: "black",
+          }}
+        >{`${vaccine}`}</Text>
+
+        {vaccine === "COVAXIN" && (
+          <Text style={{ ...styles.badge, backgroundColor: "orange" }}>
+            Inactive Virus
+          </Text>
+        )}
+        {vaccine === "COVISHIELD" && (
+          <Text style={{ ...styles.badge, backgroundColor: "blue" }}>
+            m - RNA Vaccine
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -51,10 +97,11 @@ const SloatItem = (props) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 300,
+    // height: 250,
     backgroundColor: "#393e46",
     margin: 20,
     borderRadius: 10,
+    padding: 10,
   },
   heading: {
     padding: 8,

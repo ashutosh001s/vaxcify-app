@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ToastAndroid,
+  Image,
 } from "react-native";
 import SloatItem from "./SlotItem";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -61,7 +62,8 @@ const Slots = () => {
     if (parsedData.sessions.length > 0) {
       setSlots(parsedData.sessions);
     } else {
-      showToast("No Results Found");
+      setSlots(null);
+      // showToast("No Results Found");
       return 1;
     }
 
@@ -119,7 +121,7 @@ const Slots = () => {
             marginRight: 10,
           }}
         >
-          <Text style={styles.btnTxt}>Submit</Text>
+          <Text style={styles.btnTxt}>Search</Text>
         </TouchableOpacity>
 
         <DateTimePickerModal
@@ -131,7 +133,34 @@ const Slots = () => {
       </View>
       <View style={{ marginBottom: 200 }}>
         <ScrollView style={{ height: "100%" }}>
-          {slots.length !== 0 ? (
+          {slots === null ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "50%",
+              }}
+            >
+              <Image
+                style={{ height: 200, width: 200, opacity: 0.5 }}
+                source={require("../assets/center.png")}
+                transition={false}
+              />
+
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginTop: 20,
+                }}
+              >
+                No Vaccination Center Found
+              </Text>
+            </View>
+          ) : slots.length !== 0 ? (
             <View>
               <Text
                 style={{
@@ -147,17 +176,32 @@ const Slots = () => {
               ))}
             </View>
           ) : (
-            <Text
+            <View
               style={{
-                color: "white",
-                fontSize: 15,
-                fontWeight: "bold",
-                textAlign: "center",
-                marginTop: 50,
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "50%",
               }}
             >
-              Enter your Pincode and date to find the vaccine slot
-            </Text>
+              <Image
+                style={{ height: 200, width: 200, opacity: 0.5 }}
+                source={require("../assets/vaccine.png")}
+                transition={false}
+              />
+
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginTop: 20,
+                }}
+              >
+                Enter your pincode and date to find Vaccination center
+              </Text>
+            </View>
           )}
         </ScrollView>
       </View>

@@ -11,72 +11,82 @@ import {
 } from "react-native";
 import SloatItem from "./SlotItem";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import NetInfo from "@react-native-community/netinfo";
 import * as Location from "expo-location";
+import { Entypo } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const Slots = () => {
   const dt = new Date();
+  const fdate = `${dt.getDate()}-${dt.getMonth() + 1}-${dt.getFullYear()}`;
 
   const [searchData, setSearchData] = useState({
     pincode: "",
     date: null,
     isLoading: false,
-    cityName: "",
   });
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [slots, setSlots] = useState([]);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState({ status: false, msg: "" });
+  const [location, setLocation] = useState("");
+
+  const fetchApiData = async (pin, date) => {
+    const data = await fetch(
+      `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=${pin}&date=${date}`
+    );
+    const parsedData = await data.json();
+    if (parsedData.sessions.length > 0) {
+      setSlots(parsedData.sessions);
+      setSearchData({ ...searchData, isLoading: false });
+    } else {
+      setSlots(null);
+      setSearchData({ ...searchData, isLoading: false });
+      return;
+    }
+  };
+
+  const getUserLocationAsync = async () => {
+    let req = await Location.requestForegroundPermissionsAsync();
+
+    if (req.status !== "granted") {
+      setLoadError(true);
+      setSearchData({ ...searchData, isLoading: false });
+      return;
+    } else {
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        let cords = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+        let parsedLoc = await Location.reverseGeocodeAsync(cords);
+        return [parsedLoc[0].postalCode, parsedLoc[0].city];
+      } catch (error) {
+        // console.log(error);
+        return;
+      }
+    }
+  };
 
   useEffect(() => {
     (async () => {
-      setSearchData({ ...searchData, isLoading: true });
-      const fdate = await `${dt.getDate()}-${
-        dt.getMonth() + 1
-      }-${dt.getFullYear()}`;
-
-      const getUserLocationAsync = async () => {
-        let req = await Location.requestForegroundPermissionsAsync();
-
-        if (req.status !== "granted") {
-          setLoadError(true);
-          setSearchData({ ...searchData, isLoading: false });
-          return;
-        } else {
-          try {
-            let location = await Location.getCurrentPositionAsync({});
-            let cords = {
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            };
-            let parsedLoc = await Location.reverseGeocodeAsync(cords);
-            return [parsedLoc[0].postalCode, parsedLoc[0].city];
-          } catch (error) {
-            // console.error(error);
-            return 0;
-          }
-        }
-      };
-
-      if ((await getUserLocationAsync()) === 0) {
-        setLoadError(true);
+      try {
+        setLoadError(false);
+        setSearchData({ ...searchData, isLoading: true });
+        const { isConnected } = await NetInfo.fetch();
+        if (!isConnected) throw "No Connection";
+        const [cityPin, cityName] = await getUserLocationAsync();
+        setLocation(cityName);
+        fetchApiData(cityPin, fdate);
+        // console.log(isConnected);
+      } catch (error) {
+        error === "No Connection"
+          ? setLoadError({ ...loadError, status: true, msg: "No Connection" })
+          : setLoadError({ ...loadError, status: true, msg: "No Location" });
         setSearchData({ ...searchData, isLoading: false });
-        return;
-      }
-
-      const [cityPin, cityName] = await getUserLocationAsync();
-      console.log(cityPin, cityName);
-
-      const data = await fetch(
-        `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=${cityPin}&date=${fdate}`
-      );
-      const parsedData = await data.json();
-      if (parsedData.sessions.length > 0) {
-        setSlots(parsedData.sessions);
-        setSearchData({ ...searchData, isLoading: false, cityName: cityName });
-      } else {
         setSlots(null);
-        // showToast("No Results Found");
-        setSearchData({ ...searchData, isLoading: false });
-        return 1;
+        return;
       }
     })();
   }, []);
@@ -104,7 +114,6 @@ const Slots = () => {
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const formatDate = `${day}-${month}-${year}`;
-    // console.warn("A date has been picked: ", formatDate);
     setSearchData({ ...searchData, date: formatDate });
     hideDatePicker();
   };
@@ -119,29 +128,17 @@ const Slots = () => {
       return 1;
     }
     setSearchData({ ...searchData, isLoading: true });
-
-    const data = await fetch(
-      `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=${searchData.pincode}&date=${searchData.date}`
-    );
-    const parsedData = await data.json();
-    if (parsedData.sessions.length > 0) {
-      setSlots(parsedData.sessions);
-      setSearchData({ ...searchData, isLoading: false });
-    } else {
-      setSlots(null);
-      // showToast("No Results Found");
-      setSearchData({ ...searchData, isLoading: false });
-      return 1;
-    }
-
-    // console.log(parsedData, searchData.pincode, searchData.date);
+    fetchApiData(searchData.pincode, searchData.date);
+    // console.log(searchData);
   };
+
   return (
     <View style={styles.container}>
       <View
         style={{
           flex: 1,
           justifyContent: "center",
+          // alignItems: "center",
           marginLeft: 10,
           marginTop: "5%",
         }}
@@ -151,15 +148,15 @@ const Slots = () => {
             color: "white",
             fontSize: 12,
             fontWeight: "bold",
+            // textAlign: "center",
             marginBottom: -60,
           }}
         >
-          {`Location : ${
-            searchData.cityName.length > 1 ? searchData.cityName : "Unknown"
-          }`}
+          <Entypo name="location-pin" size={17} color="white" />
+          {`Location , ${location.length > 1 ? location : "Unknown"}`}
         </Text>
       </View>
-      {loadError && (
+      {loadError.status && (
         <View
           style={{
             flex: 1,
@@ -181,8 +178,9 @@ const Slots = () => {
               borderRadius: 10,
             }}
           >
-            Please Switch on GPS and Allow Location Permission for Better User
-            Experience
+            {loadError.msg === "No Location"
+              ? `Please Switch on GPS and Allow Location Permission for Better User Experience`
+              : `No Connection`}
           </Text>
         </View>
       )}
@@ -211,7 +209,7 @@ const Slots = () => {
           onPress={showDatePicker}
           style={{
             ...styles.btn,
-            backgroundColor: "#00adb5",
+            // backgroundColor: "transparent",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -220,7 +218,11 @@ const Slots = () => {
           }}
         >
           <Text style={styles.btnTxt}>
-            {searchData.date === null ? "Select Date" : searchData.date}
+            {searchData.date === null ? (
+              <MaterialIcons name="date-range" size={24} color="white" />
+            ) : (
+              searchData.date
+            )}
           </Text>
         </TouchableOpacity>
 
@@ -228,15 +230,18 @@ const Slots = () => {
           onPress={onSubmitHandler}
           style={{
             ...styles.btn,
-            backgroundColor: "#00adb5",
+            // backgroundColor: "#00adb5",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 5,
             marginRight: 10,
           }}
+          disabled={loadError.msg === "No Connection" ? true : false}
         >
-          <Text style={styles.btnTxt}>Search</Text>
+          <Text style={styles.btnTxt}>
+            <FontAwesome5 name="search" size={24} color="white" />
+          </Text>
         </TouchableOpacity>
 
         <DateTimePickerModal
@@ -246,8 +251,8 @@ const Slots = () => {
           onCancel={hideDatePicker}
         />
       </View>
-      <View style={{ marginBottom: 200 }}>
-        <ScrollView style={{ height: "100%" }}>
+      <View>
+        <ScrollView style={{ height: "85%" }}>
           {/* //! loading */}
           {searchData.isLoading ? (
             <View
@@ -289,33 +294,6 @@ const Slots = () => {
                 }}
               >
                 No Vaccination Center Found
-              </Text>
-            </View>
-          ) : loadError === true ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "50%",
-              }}
-            >
-              <Image
-                style={{ height: 200, width: 200, opacity: 1 }}
-                source={require("../assets/vaccine.png")}
-                transition={false}
-              />
-
-              <Text
-                style={{
-                  color: "white",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  marginTop: 20,
-                }}
-              >
-                Enter Your Pincode and Date to find the Vaccination Center
               </Text>
             </View>
           ) : (

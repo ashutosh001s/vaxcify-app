@@ -45,51 +45,19 @@ const SloatItem = (props) => {
         >{`Dose2 : ${available_capacity_dose1}`}</Text>
         <Text style={styles.badge}>{`Min-age : ${min_age_limit}`}</Text>
 
-        {fee > 0 && (
-          <Text
-            style={{
-              ...styles.badge,
-              backgroundColor: "pink",
-            }}
-          >{`Type : ${fee_type}`}</Text>
-        )}
+        {fee > 0 && <Text style={styles.badge}>{`Type : ${fee_type}`}</Text>}
 
         {fee > 0 ? (
-          <Text
-            style={{
-              ...styles.badge,
-              backgroundColor: "purple",
-            }}
-          >{`Fee : ${fee}`}</Text>
+          <Text style={styles.badge}>{`Fee : ${fee}`}</Text>
         ) : (
-          <Text
-            style={{
-              ...styles.badge,
-              backgroundColor: "green",
-            }}
-          >
-            {"Free Vaccination"}
-          </Text>
+          <Text style={styles.badge}>{"Free Vaccination"}</Text>
         )}
 
         <Text
           style={{
             ...styles.badge,
-            backgroundColor: `${vaccine === "COVISHIELD" ? "white" : "gold"}`,
-            color: "black",
           }}
         >{`${vaccine}`}</Text>
-
-        {vaccine === "COVAXIN" && (
-          <Text style={{ ...styles.badge, backgroundColor: "orange" }}>
-            Inactive Virus
-          </Text>
-        )}
-        {vaccine === "COVISHIELD" && (
-          <Text style={{ ...styles.badge, backgroundColor: "blue" }}>
-            m - RNA Vaccine
-          </Text>
-        )}
       </View>
     </View>
   );

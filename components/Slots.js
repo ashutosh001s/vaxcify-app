@@ -28,7 +28,12 @@ const Slots = () => {
   });
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [slots, setSlots] = useState([]);
-  const [loadError, setLoadError] = useState({ status: false, msg: "" });
+  const [loadError, setLoadError] = useState({
+    status: false,
+    type: "",
+    network: false,
+    location: false,
+  });
   const [location, setLocation] = useState("");
 
   const fetchApiData = async (pin, date) => {
@@ -73,24 +78,41 @@ const Slots = () => {
     (async () => {
       try {
         setLoadError(false);
-        setSearchData({ ...searchData, isLoading: true });
-        const { isConnected } = await NetInfo.fetch();
-        if (!isConnected) throw "No Connection";
-        const [cityPin, cityName] = await getUserLocationAsync();
-        setLocation(cityName);
-        fetchApiData(cityPin, fdate);
-        // console.log(isConnected);
+        NetInfo.addEventListener((state) => {
+          setLoadError({
+            ...loadError,
+            status: !state.isConnected,
+            type: "Network",
+            network: !state.isConnected,
+            // location: false,
+          });
+          // console.log(state);
+        });
+        if (loadError.network) {
+          throw "Network Error";
+        } else {
+          setSearchData({ ...searchData, isLoading: true });
+          const [cityPin, cityName] = await getUserLocationAsync();
+          setLocation(cityName);
+          await fetchApiData(cityPin, fdate);
+        }
       } catch (error) {
-        error === "No Connection"
-          ? setLoadError({ ...loadError, status: true, msg: "No Connection" })
-          : setLoadError({ ...loadError, status: true, msg: "No Location" });
+        error === "Network Error"
+          ? setLoadError({ ...loadError })
+          : setLoadError({
+              ...loadError,
+              status: true,
+              type: "Location",
+              location: true,
+              // network: false,
+            });
         setSearchData({ ...searchData, isLoading: false });
         setSlots(null);
         return;
       }
     })();
   }, []);
-
+  // console.log(network);
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -162,7 +184,9 @@ const Slots = () => {
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
-            marginTop: "15%",
+            position: "absolute",
+            width: "100%",
+            bottom: 0,
           }}
         >
           <Text
@@ -171,16 +195,16 @@ const Slots = () => {
               fontSize: 12,
               fontWeight: "bold",
               textAlign: "center",
-              marginTop: 0,
-              marginBottom: -30,
               backgroundColor: "red",
+              zIndex: 1,
               padding: 5,
-              borderRadius: 10,
+              width: "100%",
             }}
           >
-            {loadError.msg === "No Location"
-              ? `Please Switch on GPS and Allow Location Permission for Better User Experience`
-              : `No Connection`}
+            {loadError.status && loadError.network && `No Connection`}
+            {loadError.status &&
+              loadError.location &&
+              `Please Allow Location for Better User Experience`}
           </Text>
         </View>
       )}
@@ -237,7 +261,9 @@ const Slots = () => {
             borderRadius: 5,
             marginRight: 10,
           }}
-          disabled={loadError.msg === "No Connection" ? true : false}
+          disabled={
+            loadError.status && loadError.type === "Network" ? true : false
+          }
         >
           <Text style={styles.btnTxt}>
             <FontAwesome5 name="search" size={24} color="white" />

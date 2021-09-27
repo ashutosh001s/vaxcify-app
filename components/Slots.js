@@ -141,6 +141,10 @@ const Slots = () => {
   };
 
   const onSubmitHandler = async () => {
+    if (isNaN(searchData.pincode)) {
+      showToast("Enter Valid Pincode");
+      return 1;
+    }
     if (String(searchData.pincode).length !== 6) {
       showToast("Enter Valid Pincode");
       return 1;
@@ -334,7 +338,7 @@ const Slots = () => {
                 }}
               >{`${slots.length} Centers found`}</Text>
               {slots.map((element) => (
-                <SloatItem vaxData={element} key={element.center_id} />
+                <SloatItem vaxData={element} key={element.session_id} />
               ))}
             </View>
           )}

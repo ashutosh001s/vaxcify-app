@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 
 const SloatItem = (props) => {
   const {
@@ -59,6 +60,30 @@ const SloatItem = (props) => {
           }}
         >{`${vaccine}`}</Text>
       </View>
+      {available_capacity > 0 && (
+        <TouchableOpacity
+          onPress={() =>
+            WebBrowser.openBrowserAsync(
+              "https://selfregistration.cowin.gov.in/"
+            )
+          }
+          style={{
+            ...styles.badge,
+            // width: "50%",
+            padding: 7,
+            backgroundColor: "#002060",
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              color: "white",
+            }}
+          >
+            Book on Co-Win
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -70,6 +95,17 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 10,
     padding: 10,
+    textAlign: "center",
+    fontSize: 10,
+    shadowColor: "#222831",
+    shadowOffset: {
+      width: 3,
+      height: 3,
+    },
+    shadowOpacity: 0.29,
+    shadowRadius: 4.65,
+
+    elevation: 15,
   },
   heading: {
     padding: 8,
@@ -94,6 +130,15 @@ const styles = StyleSheet.create({
     // height: 40,
     textAlign: "center",
     fontSize: 10,
+    shadowColor: "#222831",
+    shadowOffset: {
+      width: 3,
+      height: 3,
+    },
+    shadowOpacity: 0.29,
+    shadowRadius: 4.65,
+
+    elevation: 15,
   },
 });
 

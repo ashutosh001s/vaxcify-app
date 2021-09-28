@@ -308,17 +308,11 @@ const Slots = () => {
                 marginTop: "50%",
               }}
             >
-              <Image
-                style={{ height: 200, width: 200, opacity: 1 }}
-                source={require("../assets/center.png")}
-                transition={false}
-              />
-
+              <Entypo name="emoji-sad" size={100} color="white" />
               <Text
                 style={{
                   color: "white",
                   fontSize: 20,
-                  fontWeight: "bold",
                   textAlign: "center",
                   marginTop: 20,
                 }}
@@ -336,7 +330,7 @@ const Slots = () => {
                   textAlign: "center",
                   marginTop: 40,
                 }}
-              >{`${slots.length} Centers found`}</Text>
+              >{`${slots.length} Center(s) Found`}</Text>
               {slots.map((element) => (
                 <SloatItem vaxData={element} key={element.session_id} />
               ))}

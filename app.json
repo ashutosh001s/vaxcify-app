@@ -14,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -26,9 +24,6 @@
         "backgroundColor": "#00ADB5"
       },
       "package": "com.vaxcify"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "description": ""
   }

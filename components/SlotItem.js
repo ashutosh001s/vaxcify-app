@@ -5,7 +5,6 @@ import * as WebBrowser from "expo-web-browser";
 const SloatItem = (props) => {
   const {
     name,
-    address,
     fee_type,
     available_capacity,
     available_capacity_dose1,
@@ -15,10 +14,9 @@ const SloatItem = (props) => {
     vaccine,
   } = props.vaxData;
   return (
-    <View style={styles.container}>
+    <View style={{ ...styles.container, ...styles.shadow }}>
       <View>
         <Text style={styles.heading}>{name}</Text>
-        <Text style={styles.para}>{address}</Text>
       </View>
       <View
         style={{
@@ -69,9 +67,9 @@ const SloatItem = (props) => {
           }
           style={{
             ...styles.badge,
-            // width: "50%",
+            ...styles.shadow,
             padding: 7,
-            backgroundColor: "#002060",
+            backgroundColor: "#222839",
           }}
         >
           <Text
@@ -97,48 +95,31 @@ const styles = StyleSheet.create({
     padding: 10,
     textAlign: "center",
     fontSize: 10,
-    shadowColor: "#222831",
-    shadowOffset: {
-      width: 3,
-      height: 3,
-    },
-    shadowOpacity: 0.29,
-    shadowRadius: 4.65,
-
-    elevation: 15,
   },
   heading: {
     padding: 8,
-    fontWeight: "bold",
-    fontSize: 28,
     color: "white",
-  },
-  para: {
-    padding: 0,
-    color: "white",
-    padding: 8,
     fontWeight: "bold",
   },
+
   badge: {
     backgroundColor: "#00adb5",
     color: "white",
-    fontWeight: "bold",
     margin: 5,
     padding: 5,
     borderRadius: 10,
-    // width: 100,
-    // height: 40,
     textAlign: "center",
     fontSize: 10,
-    shadowColor: "#222831",
+  },
+  shadow: {
+    shadowColor: "#ffffff",
     shadowOffset: {
-      width: 3,
-      height: 3,
+      width: 2,
+      height: 2,
     },
-    shadowOpacity: 0.29,
+    shadowOpacity: 0.5,
     shadowRadius: 4.65,
-
-    elevation: 15,
+    elevation: 10,
   },
 });
 
